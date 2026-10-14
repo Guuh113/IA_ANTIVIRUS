@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Detector de Malware com IA</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+        #resultado { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Varredura de Ficheiro com IA</h2>
+        <input type="file" id="fileInput">
+        <button onclick="enviarFicheiro()">Analisar Ficheiro</button>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        async function enviarFicheiro() {
+            const fileInput = document.getElementById('fileInput');
+            const resultadoDiv = document.getElementById('resultado');
+
+            if (fileInput.files.length === 0) {
+                alert('Por favor, seleciona um ficheiro primeiro.');
+                return;
+            }
+
+            resultadoDiv.innerText = 'A analisar ficheiro com a IA...';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/analisar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultadoDiv.innerHTML = `
+                        <p><strong>Ficheiro:</strong> ${data.ficheiro}</p>
+                        <p><strong>Risco:</strong> ${data.probabilidade_malware}%</p>
+                        <p><strong>Classificação:</strong> <span style="color: ${data.classificacao === 'SEGURO' ? 'green' : 'red'}">${data.classificacao}</span></p>
+                    `;
+                } else {
+                    resultadoDiv.innerText = 'Erro: ' + data.erro;
+                }
+            } catch (err) {
+                resultadoDiv.innerText = 'Erro ao conectar à API da IA.';
+            }
+        }
+    </script>
+</body>
+</html>
